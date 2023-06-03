@@ -9,7 +9,9 @@ Para identificar aquellos genes regulados por SET dependiendo de p53, se elimin�
 ## Metodología:
 
 **1. preporcesamiento**
+
 Descarga, análisis de calidad, y alineamiento.
 
 **2. R**
+
 Análisis de expresión diferencial y generación de resultados
