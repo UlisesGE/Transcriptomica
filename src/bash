@@ -1,0 +1,9 @@
+#se descargan los archivos de RNA-seq
+fastq-dump --gzip --split-files SRR3711076
+fastq-dump --gzip --split-files SRR3711077
+fastq-dump --gzip --split-files SRR3711079
+fastq-dump --gzip --split-files SRR3711080
+fastq-dump --gzip --split-files SRR3711082
+fastq-dump --gzip --split-files SRR3711083
+fastq-dump --gzip --split-files SRR3711084
+fastq-dump --gzip --split-files SRR3711085
