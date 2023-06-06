@@ -7,3 +7,28 @@ fastq-dump --gzip --split-files SRR3711082
 fastq-dump --gzip --split-files SRR3711083
 fastq-dump --gzip --split-files SRR3711084
 fastq-dump --gzip --split-files SRR3711085
+
+
+#Se visualiza la calidad de los archivos:
+fastqc SRR3711076.fastq.gz
+fastqc SRR3711077.fastq.gz
+fastqc SRR3711079.fastq.gz
+fastqc SRR3711080.fastq.gz
+fastqc SRR3711082.fastq.gz
+fastqc SRR3711083.fastq.gz
+fastqc SRR3711084.fastq.gz
+fastqc SRR3711085.fastq.gz
+
+#Se realiza limpieza de archivos (en directorio "VISUALIZACIONES"):
+trim_galore --fastqc ../SRR3711076.fastq.gz
+trim_galore --fastqc ../SRR3711077.fastq.gz
+trim_galore --fastqc ../SRR3711079.fastq.gz
+trim_galore --fastqc ../SRR3711080.fastq.gz
+trim_galore --fastqc ../SRR3711082.fastq.gz
+trim_galore --fastqc ../SRR3711083.fastq.gz
+trim_galore --fastqc ../SRR3711084.fastq.gz
+trim_galore --fastqc ../SRR3711085.fastq.gz
+
+#Se descarga un genoma de referencia 
+wget ftp://ftp.ensembl.org/pub/release-84/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
+
