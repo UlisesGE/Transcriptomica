@@ -29,6 +29,6 @@ trim_galore --fastqc ../SRR3711083.fastq.gz
 trim_galore --fastqc ../SRR3711084.fastq.gz
 trim_galore --fastqc ../SRR3711085.fastq.gz
 
-#Se descarga un genoma de referencia 
-wget ftp://ftp.ensembl.org/pub/release-84/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
+#Se realizan los alineamientos>
+hisat2 -p 20 --no-mixed --no-discordant --no-unal -x 
 
