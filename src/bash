@@ -31,4 +31,30 @@ trim_galore --fastqc ../SRR3711085.fastq.gz
 
 #Se realizan los alineamientos
 hisat2 -p 20 --no-mixed --no-discordant --no-unal -× /export/storage/users/dvalle/indexes/mm10.ensemb199.genes -U ../VISUALIZACIONES/SRR3711076_1_trimmed.fq.gz -S SSR3711076_aln.sam
+hisat2 -p 20 --no-mixed --no-discordant --no-unal -× /export/storage/users/dvalle/indexes/mm10.ensemb199.genes -U ../VISUALIZACIONES/SRR3711077_1_trimmed.fq.gz -S SSR3711077_aln.sam
+hisat2 -p 20 --no-mixed --no-discordant --no-unal -× /export/storage/users/dvalle/indexes/mm10.ensemb199.genes -U ../VISUALIZACIONES/SRR3711079_1_trimmed.fq.gz -S SSR3711079_aln.sam
+hisat2 -p 20 --no-mixed --no-discordant --no-unal -× /export/storage/users/dvalle/indexes/mm10.ensemb199.genes -U ../VISUALIZACIONES/SRR3711080_1_trimmed.fq.gz -S SSR3711080_aln.sam
+hisat2 -p 20 --no-mixed --no-discordant --no-unal -× /export/storage/users/dvalle/indexes/mm10.ensemb199.genes -U ../VISUALIZACIONES/SRR3711082_1_trimmed.fq.gz -S SSR3711082_aln.sam
+hisat2 -p 20 --no-mixed --no-discordant --no-unal -× /export/storage/users/dvalle/indexes/mm10.ensemb199.genes -U ../VISUALIZACIONES/SRR3711083_1_trimmed.fq.gz -S SSR3711083_aln.sam
+hisat2 -p 20 --no-mixed --no-discordant --no-unal -× /export/storage/users/dvalle/indexes/mm10.ensemb199.genes -U ../VISUALIZACIONES/SRR3711084_1_trimmed.fq.gz -S SSR3711084_aln.sam
+hisat2 -p 20 --no-mixed --no-discordant --no-unal -× /export/storage/users/dvalle/indexes/mm10.ensemb199.genes -U ../VISUALIZACIONES/SRR3711085_1_trimmed.fq.gz -S SSR3711085_aln.sam
 
+#Se generan archivos BAM
+samtools view -bSq 10 SSR3711076_aln.sam | samtools sort --threads 10 -T SSR3711076_WT1 -o SSR3711076_WT1.bam
+samtools view -bSq 10 SSR3711077_aln.sam | samtools sort --threads 10 -T SSR3711077_WT2 -o SSR3711077_WT2.bam
+samtools view -bSq 10 SSR3711079_aln.sam | samtools sort --threads 10 -T SSR3711079_WT3kd -o SSR3711076_WT3kd.bam
+samtools view -bSq 10 SSR3711080_aln.sam | samtools sort --threads 10 -T SSR3711080_WT4kd -o SSR3711080_WT4kd.bam
+samtools view -bSq 10 SSR3711082_aln.sam | samtools sort --threads 10 -T SSR3711082_p53KO -o SSR3711082_p53KO.bam
+samtools view -bSq 10 SSR3711083_aln.sam | samtools sort --threads 10 -T SSR3711083_p53KO2 -o SSR3711083_p53KO2.bam
+samtools view -bSq 10 SSR3711084_aln.sam | samtools sort --threads 10 -T SSR3711084_p53KO3kd -o SSR3711084_p53KO3kd.bam
+samtools view -bSq 10 SSR3711085_aln.sam | samtools sort --threads 10 -T SSR3711085_p53KO4kd -o SSR3711085_p53KO4kd.bam
+
+#Indices BAM
+samtools index SSR3711076_WT1.bam
+samtools index SSR3711077_WT2.bam
+samtools index SSR3711076_WT3kd.bam
+samtools index SSR3711080_WT4kd.bam
+samtools index SSR3711082_p53KO.bam
+samtools index SSR3711083_p53KO2.bam
+samtools index SSR3711084_p53KO3kd.bam
+samtools index SSR3711085_p53KO4kd.bam
