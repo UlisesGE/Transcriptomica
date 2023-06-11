@@ -12,6 +12,10 @@ Para identificar aquellos genes regulados por SET dependiendo de p53, se elimin�
 
 Descarga, análisis de calidad, y alineamiento.
 
-**2. R**
+**2. Generación de counts**
+
+Generación de archivo de cuentas en Tepeu
+
+**3. R**
 
 Análisis de expresión diferencial y generación de resultados
