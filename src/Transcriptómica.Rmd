@@ -1,5 +1,165 @@
 ---
 title: "Identificación de genes regulados por interacción p53-SET"
 author: "Ulises Gaspar"
-output: html_notebook
+output:
+  pdf_document: default
+  html_notebook: default
 ---
+
+```{r}
+setwd("/Users/hecto/Downloads")
+```
+
+
+Se importan librerías:
+```{r}
+library(limma)
+library(edgeR)
+library("pheatmap")
+library(ggplot2)
+library(gplots)
+```
+
+Se cargan los datos de fc:
+```{r}
+fc <- read.table("counts.txt", header = T)
+```
+
+Cargar información a edgeR:
+```{r}
+samples <- factor(c("WildType", "WildType", "WildTypeKnockDown", "WildTypeKnockDown", "p53KnockOut", "p53KnockOut", "p53KnockOutKnockDown", "p53KnockOutKnockDown"))
+
+DGEList_p53 = DGEList(counts=fc[,3:10], group=samples, genes=fc[,1:2])
+dim(DGEList_p53)
+```
+
+Se eliminan genes con baja expresión
+```{r}
+keep = rowSums(cpm(DGEList_p53)>1) >= 3
+DGEList_p53 = DGEList_p53[keep,]
+dim(DGEList_p53)
+```
+Se genera la matriz de diseño
+```{r}
+design <- model.matrix(~0+samples)
+colnames(design) <- levels(samples)
+```
+
+Factores de normalización y variación de las muestras:
+```{r}
+DGEList_p53 = calcNormFactors(DGEList_p53)
+DGEList_p53 = estimateDisp(DGEList_p53, design = design)
+
+```
+
+Se genera un PCA. Se consideran aquellos con p53 funcional como control (solo las primeras dos muestras)
+```{r}
+colors = c("blue", "blue", "red", "red", "red", "red", "red", "red")
+plotMDS(DGEList_p53, cex = 0.8, col = colors, )
+```
+Se observa como los datos se agrupan en su grupo correspondiente. 
+
+```{r}
+PCA_log2CPM = prcomp(t(cpm(DGEList_p53, log = T)), center = T, scale = T)
+PCA_perc_var = round(((PCA_log2CPM$sdev^2/sum(PCA_log2CPM$sdev^2))*100), 1)
+
+color_range <- colorRampPalette(c("#d62828", "#FED4CC"))
+
+barplot(PCA_perc_var, names = colnames(PCA_log2CPM$x), main = "Scree plot", col = color_range(11), xlab = "principal components", ylab = "Percent variation")
+```
+Los 2 primeros componentes parecen explicar mucha de la variabilidad (~20% cada uno), pero aún así no es tan fuerte.
+
+Se procede a calcular los genes expresados diferencialmente
+Como tenemos 4 grupos, y solo 1 tiene p53 funcional, consideré que solo 2 conrastes son necesarios, replicando el paper: CRISPR Ctr (Wt) vs CRISPR Crt/SET kd, y CRISPR Ctr/SET kd vs CRISPR p55 KO/SET kd
+```{r}
+fit <- glmFit(DGEList_p53, design)
+
+#contrastWTSETkd_v_WT <- glmLRT(fit, contrast = makeContrasts(WildTypeKnockDown - WildType, levels = design))
+contrastWT_v_WTSETkd <- glmLRT(fit, contrast = makeContrasts(WildType - WildTypeKnockDown, levels = design))
+
+#contrastWTSETkd_v_p53KOSETkd <- glmLRT(fit, contrast = makeContrasts(WildTypeKnockDown - p53KnockOutKnockDown, levels = design))
+contrastp53KOSETkd_v_WTSETkd <- glmLRT(fit, contrast = makeContrasts(p53KnockOutKnockDown - WildTypeKnockDown, levels = design))
+```
+
+Se visualizan los genes del contraste entre CRISPR ctr vs CRISPR ctr/SET kd (aquellos con ):
+```{r}
+dt_significant1 <- decideTestsDGE(contrastWT_v_WTSETkd, adjust.method = "BH", p.value = 0.05)
+vctr_names_sig1 <- rownames(DGEList_p53)[as.logical(dt_significant1)]
+plotSmear(contrastWT_v_WTSETkd, de.tags = vctr_names_sig)
+abline(h = c(-2,2), col = "blue")
+```
+Se visualizan los genes del contraste entre CRISPR Ctr/SETkd vs CRISPR p55 KO/SET kd: 
+```{r}
+dt_significant2 <- decideTestsDGE(contrastp53KOSETkd_v_WTSETkd, adjust.method = "BH", p.value = 0.05)
+vctr_names_sig1 <- rownames(DGEList_p53)[as.logical(dt_significant2)]
+plotSmear(contrastp53KOSETkd_v_WTSETkd, de.tags = vctr_names_sig)
+abline(h = c(-2,2), col = "blue")
+```
+Heatmap herárquico de genes expresados diferencialmente:
+```{r}
+vctr_sig <- as.logical(decideTestsDGE(contrastWT_v_WTSETkd, adjust.method = "BH", p.value = 0.000005))
+vctr_sig<- vctr_sig | as.logical(decideTestsDGE(contrastp53KOSETkd_v_WTSETkd, adjust.method = "BH", p.value = 0.000005))
+vctr_names_hcl <- rownames(DGEList_p53)[vctr_sig]
+length(vctr_names_hcl)
+```
+
+
+```{r}
+mtrx_significant <- DGEList_p53$counts[vctr_names_hcl, ]
+
+Genes_significant <- DGEList_p53$genes[vctr_names_hcl, ]
+
+vctr_colors =  as.factor(c("black", "red", "green", "blue"))
+```
+
+```{r}
+vctr_sample_colors <- as.character(vctr_colors[as.numeric(DGEList_p53$samples$group)])
+vctr_sample_colors
+```
+
+```{r}
+heatmap.2(log2(mtrx_significant + 1), ColSideColors = vctr_sample_colors, key = TRUE, trace = "none", col = heat.colors(200), scale = "row")
+```
+
+Se procede a hacer el análisis de ontología de genes:
+
+```{r}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("clusterProfiler")
+
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("AnnotationDbi")
+
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("org.Mm.eg.db")
+```
+
+```{r}
+library(clusterProfiler)
+library(org.Mm.eg.db)
+library(AnnotationDbi)
+```
+
+Proceso biológico
+```{r}
+GO_results = enrichGO(gene = Genes_significant$GeneID, OrgDb = org.Mm.eg.db, keyType = "ENSEMBL", ont = "BP")
+plot(barplot(GO_results, showCategory = 12, font.size = 7, title = "Procesos biológicos"))
+```
+Función molecular:
+```{r}
+GO_resultsMF = enrichGO(gene = Genes_significant$GeneID, OrgDb = org.Mm.eg.db, keyType = "ENSEMBL", ont = "MF")
+plot(barplot(GO_resultsMF, showCategory = 12, font.size = 7, title = "Función molecular"))
+```
+
+```{r}
+GO_resultsCC = enrichGO(gene = Genes_significant$GeneID, OrgDb = org.Mm.eg.db, keyType = "ENSEMBL", ont = "CC")
+plot(barplot(GO_resultsCC, showCategory = 12, font.size = 7, title = "Componente celular"))
+```
+
+
