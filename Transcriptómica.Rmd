@@ -1,8 +1,0 @@
----
-title: "Identificación de genes regulados por interacción p53-SET"
-author: "Ulises Gaspar"
-output: html_notebook
----
-
-#Se importan librerías:
-library("recount3")
